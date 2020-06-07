@@ -1,18 +1,82 @@
-# Билет ??.
+# Билет 30
 
-Сложности:
-* 12: семантика и pop
-* 13: std::function
-* 16: enable_if_t
-* 17: поминки, на экзе разберешься если чё
-* 18: const_cast
-* 19: интересные примеры от глеба, нестрашно
-* 20: см лабу про вектор, ты вроде её хорошо написал
-* 21: см свои записи про Value category
-* 23: 1:15:40 важно про forwarding, 24:30 последняя лекция про perfect forwarding для функторов, 1:28:17 про отличия двух подходов
-* 36: https://youtu.be/o19sTLHETp0?list=PL8a-dtqmQc8p-vvnjMyKJ7RNgkAECNuwv&t=930
-* 37: https://youtu.be/bpzVCkLHyaA?list=PL8a-dtqmQc8p-vvnjMyKJ7RNgkAECNuwv&t=3806
-* 38-39: не успел https://youtu.be/o19sTLHETp0?list=PL8a-dtqmQc8p-vvnjMyKJ7RNgkAECNuwv&t=4616
-* 40-41: 1:08:53 <— тут ты сдох https://youtu.be/D-6jB4TrxW8?list=PL8a-dtqmQc8p-vvnjMyKJ7RNgkAECNuwv&t=2118
+## Пример 1
+```cpp
+void foo(vector<int> foo_data) { sort(foo_data.begin(), foo_data.end(); .. };
 
-* https://cppinsights.io/
+int main() {
+    vector<int> data = {1, 2, 3, 4, 5};
+    foo(data);  // Тут скопируем, вектор ещё нужен.
+    data.emplace_back(6);  // {1, 2, 3, 4, 5, 6}
+    foo(std::move(data));  // Разрешили не копировать.
+    data.clear();  // Вектор мог остаться непустым, не определено moved-from.
+}
+```
+
+## Пример 2
+Если объект можно копировать, то обычно rvalue ссылки не нужны. Если же вы в данном случае из написали, то возможно вы нарушили ожидания у большинства C++ программистов.
+    ```cpp
+    void foo(Foo &&x);
+    Foo bar;
+    foo(bar);             // Не компилируется.
+    foo(Foo(bar));        // Надо явно копировать, но так не принято.
+    foo(std::move(bar));  // Явно мувать можно всегда.
+    ```
+## Пример 3
+
+```cpp
+void createCodesTable(const std::unique_ptr<HuffmanNode>& node) noexcept ;
+```
+    ```cpp
+    Node(Node left_, Node right_)
+        : left(make_unique<Node>(std::move(left_))), .... {}
+    ```
+    Конструктор от `unique_ptr` появляется только с целью оптимизиции:
+    ```cpp
+    // Оптимизация: всегда оборачиваем в `unique_ptr`, давайте сразу его возьмём.
+    Node(unique_ptr<Node> left_, unique_ptr<Node> right_)  // Без &&
+    : left(std::move(left_)), right(std::move(right_)) {}
+    ```
+
+## Пример 4
+```cpp
+struct string_view {  // C++17
+    const char *data; size_t length;
+    string_view substr(size_t pos = 0, size_t count = npos) const;
+    ...
+};
+```
+
+```cpp
+template<typename T>
+struct span {  // C++20
+    const T *data; size_t length; 
+    ...
+}
+```
+
+## Пример 5
+```cpp
+struct SearchTreeNode {
+    std::unique_ptr<SearchTreeNode> left, right;
+    int key; std::string value;
+};
+```
+
+## Пример 6
+```cpp 
+{
+    std::unique_ptr<SomeData> ptr = ....;
+    SomeData *ptr2 = ptr.get();
+}  // unique_ptr сам вызовет delete
+```
+
+```cpp
+{
+    std::unique_ptr<SomeData> ptr = ....;
+    SomeData *ptr2 = ptr.release();
+}  // утечка
+```
+
+
+
