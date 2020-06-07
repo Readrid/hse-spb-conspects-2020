@@ -34,8 +34,7 @@ Node(Node left_, Node right_)
 ```
 Конструктор от `unique_ptr` появляется только с целью оптимизиции:
 ```cpp
-// Оптимизация: всегда оборачиваем в `unique_ptr`, давайте сразу его возьмём.
-Node(unique_ptr<Node> left_, unique_ptr<Node> right_)  // Без &&
+Node(unique_ptr<Node> left_, unique_ptr<Node> right_)
     : left(std::move(left_)), right(std::move(right_)) {}
 ```
 
