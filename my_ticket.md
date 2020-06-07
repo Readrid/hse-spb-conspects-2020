@@ -28,16 +28,16 @@ foo(std::move(bar));  // Явно мувать можно всегда.
 ```cpp
 void createCodesTable(const std::unique_ptr<HuffmanNode>& node) noexcept ;
 ```
-    ```cpp
-    Node(Node left_, Node right_)
-        : left(make_unique<Node>(std::move(left_))), .... {}
-    ```
-    Конструктор от `unique_ptr` появляется только с целью оптимизиции:
-    ```cpp
-    // Оптимизация: всегда оборачиваем в `unique_ptr`, давайте сразу его возьмём.
-    Node(unique_ptr<Node> left_, unique_ptr<Node> right_)  // Без &&
+```cpp
+Node(Node left_, Node right_)
+    : left(make_unique<Node>(std::move(left_))), .... {}
+```
+Конструктор от `unique_ptr` появляется только с целью оптимизиции:
+```cpp
+// Оптимизация: всегда оборачиваем в `unique_ptr`, давайте сразу его возьмём.
+Node(unique_ptr<Node> left_, unique_ptr<Node> right_)  // Без &&
     : left(std::move(left_)), right(std::move(right_)) {}
-    ```
+```
 
 ## Пример 4
 ```cpp
