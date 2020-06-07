@@ -1,6 +1,28 @@
 ## Прочие мелочи, не в билетах
+Авторы: ..., Пётр Сурков
 
-### TODO: If-with-init statement
+### If-with-init statement
+Хотим завести переменную, чтобы она была доступна только в условиях и телах `if`, `else if`, `else`.
+
+Очевидное решение:
+```c++
+map<int, string> m = ...;
+{
+    typename map<int, string>::iterator it = m.find(10);
+    if (it != m.end()) cout << it->second << '\n';
+    else               cout << "Not found\n";
+}  // После этой скобки `it` недоступен
+```
+
+Решение строго лучше, пишем объявление прямо в `if`:
+```c++
+map<int, string> m = ...;
+if (auto it = m.find(10); it != s.end()) {
+    cout << it->second << '\n';
+} else {
+    cout << "Not found\n";  // it тут доступен.
+}  // После этой скобки `it` недоступен.
+```
 
 ### Строковые литералы
 Тип строковых литералов - массив `const char` фиксированной (на этапе компиляции) длины. Это позволяет писать такие шаблонные функции:
@@ -27,6 +49,7 @@ static_assert(parse_format("hello%d=%s").second[1] == 's');
 ```
 Таким образом, вот эта [библиотека](https://github.com/hanickadot/compile-time-regular-expressions) позволяет работать с регулярками в стиле `ctre::match<"[a-z]+([0-9]+)">(s)`
 
+RTTI: не написано, пусть хоть ссылка на презу будет: https://github.com/yeputons/hse-2019-cpp/blob/master/26-200421/presentation.md#311-rtti-%D0%B8-dynamic_cast
 ### TODO: RTTI
 #### TODO: "полиморфный класс"
 #### TODO: typeid

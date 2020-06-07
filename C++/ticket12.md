@@ -54,8 +54,8 @@ private:
 ```cpp
 struct DataHolder {
   DataHolder(const DataHolder& other) : size_{other.size_} { 
-      std::unique_ptr<char[]> newdata(new char[size_]);
-      std::memcpy(newdata.get(), other.data_, other.size_);
+      std::unique_ptr<char[]> newdata = std::make_unique<char[]>(size_);
+      std::copy(other.data_, other.data_ + other.size_, newdata.get());
       data_ = newdata.release();
   }
   
@@ -64,17 +64,15 @@ struct DataHolder {
     std::swap(size_, other.size_);
     return *this;
   }
-  // При вызове создаетсь копия, того что передали (или мувается, но это видимо здесь неважно), 
-  // затем происходит обмен полями с other и так как время жизни other ограничено фигурными 
-  // скобаками, то он удалится и вызовется деструктор DataHolder и старый data_ удалится.
+  // При вызове создается копия, забираем себе ее данные, передаем other наши, после выхода из функции он их уничтожает
 
 private:
-  char* data_;
+  char* data_; // лучше использовать unique_ptr, чтобы избегать утечек
   std::size_t size_;
 };
   
 ```
-*Замечание* ```cpp std::unqiue_ptr<T[]>``` для того, чтобы если в std::memcpy произойдет исключение не произошло утечки ресурсов.
+*Замечание* ```std::unqiue_ptr<T[]>``` для того, чтобы если дальше по коду произойдет исключение не произошло утечки ресурсов. 
 
 Из-за такой реализации код сильно упрощается.
 ### Проблемы с move-семантикой
